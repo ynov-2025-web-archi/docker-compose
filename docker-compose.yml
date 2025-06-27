@@ -1,0 +1,92 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:latest
+    container_name: ecommerce_postgres
+    environment:
+      POSTGRES_USER: vincent
+      POSTGRES_PASSWORD: vincent
+      POSTGRES_DB: ecommerce
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks :
+      - ecommerce_network
+
+  mongodb:
+    image: mongo:latest
+    container_name: ecommerce_mongodb
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: vincent
+      MONGO_INITDB_ROOT_PASSWORD: vincent
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - ecommerce_network
+
+  products-api: 
+    build: 
+      context: ./ecommerce_apis/products
+      dockerfile: Dockerfile
+    container_name: products_api
+    environment:
+      DATABASE_URL: postgres://vincent:vincent@postgres:5432/ecommerce
+    ports:
+      - "3030:3030"
+    depends_on:
+      - postgres
+    networks:
+      - ecommerce_network
+
+  newsletter-api: 
+    build: 
+      context: ./ecommerce_apis/newsletter
+      dockerfile: Dockerfile
+    container_name: newsletter_api
+    environment:
+      DATABASE_URL: mongodb://vincent:vincent@mongodb:27017/newsletter
+    ports:
+      - "3031:3031"
+    depends_on:
+      - mongodb
+    networks:
+      - ecommerce_network
+
+  gateway:
+    build: 
+      context: ./ecommerce_apis/gateway
+      dockerfile: Dockerfile
+    container_name: ecommerce_gateway
+    ports:
+      - "3001:3001"
+    depends_on:
+      - products-api
+      - newsletter-api
+    networks:
+      - ecommerce_network
+
+  frontend:
+    build: 
+      context: ./ecommerce_front/front
+      dockerfile: Dockerfile
+    container_name: ecommerce_frontend
+    ports:
+      - "3000:3000"
+    depends_on:
+      - gateway
+    networks:
+      - ecommerce_network 
+
+volumes:
+  postgres_data:
+    driver: local
+  mongodb_data:
+    driver: local
+
+networks:
+  ecommerce_network:
+    driver: bridge
