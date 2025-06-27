@@ -30,7 +30,7 @@ services:
 
   products-api: 
     build: 
-      context: ./ecommerce_apis/products
+      context: ../ecommerce_apis/products-api
       dockerfile: Dockerfile
     container_name: products_api
     environment:
@@ -44,7 +44,7 @@ services:
 
   newsletter-api: 
     build: 
-      context: ./ecommerce_apis/newsletter
+      context: ../ecommerce_apis/newsletter-api
       dockerfile: Dockerfile
     container_name: newsletter_api
     environment:
@@ -58,9 +58,12 @@ services:
 
   gateway:
     build: 
-      context: ./ecommerce_apis/gateway
+      context: ../ecommerce_apis/gateway-graphql
       dockerfile: Dockerfile
     container_name: ecommerce_gateway
+    environment:
+      PRODUCTS_API_URL: http://products-api:3030
+      NEWSLETTER_API_URL: http://newsletter-api:3031
     ports:
       - "3001:3001"
     depends_on:
@@ -74,6 +77,8 @@ services:
       context: ./ecommerce_front/front
       dockerfile: Dockerfile
     container_name: ecommerce_frontend
+    environment:
+      API_GATEWAY_URL: http://gateway:3001
     ports:
       - "3000:3000"
     depends_on:
