@@ -58,6 +58,21 @@ services:
     networks:
       - ecommerce_network
 
+  search-api:
+    build:
+      context: ../ecommerce_apis/search-api
+      dockerfile: Dockerfile
+    container_name: search_api
+    environment:
+      DATABASE_URL: postgres://vincent:vincent@postgres:5432/ecommerce
+      PORT: 3032
+    ports:
+      - "3032:3032"
+    depends_on:
+      - postgres
+    networks:
+      - ecommerce_network
+
   gateway:
     build: 
       context: ../ecommerce_apis/gateway-proxy
@@ -66,12 +81,14 @@ services:
     environment:
       PRODUCTS_SERVICE_URL: http://products-api:3030
       NEWSLETTER_SERVICE_URL: http://newsletter-api:3031
+      SEARCH_SERVICE_URL: http://search-api:3032
       PORT: 4000
     ports:
       - "4000:4000"
     depends_on:
       - products-api
       - newsletter-api
+      - search-api
     networks:
       - ecommerce_network
 
