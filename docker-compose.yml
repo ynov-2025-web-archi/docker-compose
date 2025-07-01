@@ -109,7 +109,7 @@ services:
       dockerfile: Dockerfile
     container_name: brevo_serverless
     environment:
-      BREVO_API_KEY: your_brevo_api_key_here
+      BREVO_API_KEY: ${BREVO_API_KEY}
     ports:
       - "9000:8080"
     depends_on:
