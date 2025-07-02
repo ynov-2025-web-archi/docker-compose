@@ -60,6 +60,7 @@ services:
     container_name: newsletter_api
     environment:
       MONGODB_URI: mongodb://vincent:vincent@mongodb:27017/newsletter?authSource=admin
+      REDIS_URL: redis://redis:6379
       PORT: 3031
     ports:
       - "3031:3031"
@@ -68,6 +69,21 @@ services:
     networks:
       - ecommerce_network
 
+  discount-api:
+    build: 
+      context: ../ecommerce_apis/discount-api
+      dockerfile: Dockerfile
+    container_name: discount_api
+    environment:
+      REDIS_URL: redis://redis:6379
+      PORT: 3034
+    ports:
+      - "3034:3034"
+    networks:
+      - ecommerce_network
+    depends_on:
+      - redis
+      
   search-api:
     build:
       context: ../ecommerce_apis/search-api
